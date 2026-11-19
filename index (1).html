@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexLog Logística (React) | Vista prèvia</title>
+  <meta name="description" content="Vista prèvia de la web NexLog Logística feta amb React i Tailwind CSS. Projecte estudiantil." />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style> body { font-family: 'Inter', system-ui, sans-serif; } html { scroll-behavior: smooth; } </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+    const { useState } = React;
+
+    const contact = {
+      address1: "Carrer de la Logística, 24 · Nau 7",
+      address2: "43004 Tarragona (Espanya)",
+      phone: "+34 646 390 622",
+      email: "joan953@vidalibarraquer.net",
+    };
+
+    // URL de l'API de SheetDB (Google Sheet connectat). Enganxa aquí la teva URL real de SheetDB.
+    const SHEETDB_API = "https://sheetdb.io/api/v1/hktgh3y1p3vfg";
+
+    const nums = ["+120", "12.000 m²", "99,8%", "24/7"];
+    const codes = [{ code: "NX-MAR-001", ref: "TRM-FCL-LCL-2026" }, { code: "NX-TER-002", ref: "TRT-FTL-LTL-2026" }, { code: "NX-ALM-003", ref: "ALM-WMS-2026" }];
+    const IMG = {
+      hero: "https://images.pexels.com/photos/3057960/pexels-photo-3057960.jpeg?auto=compress&cs=tinysrgb&w=1600",
+      srv: ["https://images.pexels.com/photos/93106/pexels-photo-93106.jpeg?auto=compress&cs=tinysrgb&w=1200","https://images.pexels.com/photos/3856440/pexels-photo-3856440.jpeg?auto=compress&cs=tinysrgb&w=1200","https://images.pexels.com/photos/4483610/pexels-photo-4483610.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+      about: "https://images.pexels.com/photos/1095814/pexels-photo-1095814.jpeg?auto=compress&cs=tinysrgb&w=1400",
+      blog: ["https://images.pexels.com/photos/799091/pexels-photo-799091.jpeg?auto=compress&cs=tinysrgb&w=1200","https://images.pexels.com/photos/4487363/pexels-photo-4487363.jpeg?auto=compress&cs=tinysrgb&w=1200","https://images.pexels.com/photos/1544372/pexels-photo-1544372.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+    };
+
+    const translations = {
+      ca: {
+        nav: { inici: "Inici", serveis: "Serveis", empresa: "Qui Som", blog: "Blog", tracking: "Seguiment", contacte: "Contacte", quote: "Demanar cotització" },
+        hero: { eyebrow: "Transport i cadena de subministrament", title: "Solucions logístiques globals", lead: "Movem la teva mercaderia per mar, terra i magatzem amb control duaner integral. Fiabilitat, tecnologia i cobertura internacional en un sol operador.", quote: "Demanar cotització", services: "Veure serveis" },
+        intro: { title: "Un operador logístic tècnic i de confiança", text: "A NexLog combinem experiència en comerç internacional amb tecnologia de gestió per moure la teva mercaderia amb precisió i traçabilitat.", points: [["Cobertura global", "Més de 120 ports connectats arreu del món."], ["Tecnologia WMS", "Traçabilitat per SKU i seguiment GPS en temps real."], ["Gestió duanera", "Tramitació del DUA i assessorament en Incoterms®."]] },
+        stats: ["Ports connectats", "Magatzem propi", "Exactitud d'inventari", "Seguiment GPS"],
+        home: { title: "Els nostres serveis logístics", subtitle: "Tres línies tècniques i complementàries per cobrir tot el cicle de la teva mercaderia.", cards: [["Transport marítim", "Contenidor complet (FCL) i grupatge (LCL) amb Incoterms® 2020."], ["Transport terrestre", "Càrrega completa (FTL) i grupatge (LTL) amb quadern CMR."], ["Emmagatzematge i duanes", "Magatzem amb WMS i tramitació del DUA i dipòsit duaner."]], link: "Veure fitxa tècnica →" },
+        cta: { title: "Necessites moure la teva mercaderia?", text: "Explica'ns l'origen, el destí i el tipus de càrrega i t'enviarem una cotització tècnica adaptada.", btn: "Sol·licitar cotització" },
+        serveis: { crumb: "Inici / Serveis", title: "Catàleg de serveis logístics", subtitle: "Tres línies tècniques amb referència interna, dades de comerç internacional i Incoterms® 2020.", numTecnic: "Núm. tècnic", refInterna: "Ref. interna", dades: "Dades tècniques", btn: "Demanar pressupost",
+          items: [
+            { title: "Transport marítim internacional (FCL / LCL)", def: "Transport per via marítima en règim de contenidor complet (FCL) o grupatge (LCL), amb gestió documental i despatx duaner d'origen a destí.", specs: [["Contenidors", "20′ DV (33,2 m³ · 28.200 kg), 40′ DV (67,7 m³) i 40′ HC (76,4 m³)."], ["Incoterms® 2020", "EXW, FOB, CFR, CIF i DAP."], ["Documentació", "Bill of Lading (B/L), factura comercial i packing list."], ["Trànsit", "Shanghai – Barcelona en 30–38 dies."]] },
+            { title: "Transport terrestre i distribució (FTL / LTL)", def: "Distribució per carretera nacional i internacional, en càrrega completa (FTL) o grupatge (LTL), amb traçabilitat GPS i lliurament porta a porta.", specs: [["Capacitat tràiler lona", "33 palets EUR-EPAL · 24.000 kg · 90 m³."], ["Règim documental", "quadern CMR (transport internacional per carretera)."], ["Temperatura (ATP)", "de −25 °C a +25 °C."], ["Terminis", "nacional 24–48 h · UE 48–96 h."]] },
+            { title: "Emmagatzematge i gestió duanera (Warehousing)", def: "Emmagatzematge, preparació de comandes (picking) i tramitació duanera, operats amb sistema de gestió de magatzem (WMS) i inventari permanent.", specs: [["Instal·lació", "12.000 m² amb 15 molls de càrrega."], ["WMS", "traçabilitat per SKU amb RFID i codi de barres."], ["Duana", "tramitació del DUA, dipòsit duaner (DDA) i dipòsit fiscal."], ["Nivell de servei", "99,8% d'exactitud d'inventari."]] },
+          ] },
+        empresa: { crumb: "Inici / Qui Som", title: "Qui som", subtitle: "Un operador logístic tècnic al servei del comerç internacional.", aboutTitle: "Movem mercaderies, connectem mercats", aboutText: "NexLog Logística és un operador de transport i cadena de subministrament especialitzat en comerç internacional. Gestionem enviaments marítims, terrestres i d'emmagatzematge perquè la teva mercaderia arribi a temps i amb la documentació en regla.", btn: "Contacta amb nosaltres", valorsTitle: "Com treballem", valorsSubtitle: "Tres principis que guien cada operació que posem en marxa.", valors: [["Fiabilitat", "Compromís amb els terminis i la cura de la mercaderia en cada etapa."], ["Tecnologia", "Sistemes WMS i seguiment GPS que donen traçabilitat i control."], ["Cobertura", "Una xarxa internacional d'agents que arriba a més de 120 ports."]] },
+        contacte: { crumb: "Inici / Contacte", title: "Contacta amb nosaltres", subtitle: "Explica'ns què necessites moure i et prepararem una cotització tècnica sense compromís.", dadesTitle: "Dades de contacte", labels: ["Adreça", "Telèfon", "Correu electrònic", "Horari"], horari: "De dilluns a divendres, de 8.00 a 18.00 h", formTitle: "Demana el teu pressupost", f: { nom: "Nom i cognoms *", empresa: "Empresa", email: "Correu electrònic *", telefon: "Telèfon", consulta: "Consulta operativa *", btn: "Enviar sol·licitud", ok: "Gràcies! Hem rebut la teva sol·licitud. Et respondrem en menys de 24 h laborables." }, ph: { nom: "El teu nom", empresa: "Nom de l'empresa", email: "nom@empresa.com", telefon: "+34 600 000 000", consulta: "Indica origen, destí, tipus de mercaderia i volum." } },
+        blog: { crumb: "Inici / Blog", title: "Blog logístic", subtitle: "Articles pràctics sobre comerç internacional, transport i cadena de subministrament.", posts: [["Comerç internacional", "Incoterms® 2020: qui paga i qui assumeix el risc", "Diferència entre FOB, CIF i DAP i com triar el terme adequat.", "15 de gener de 2026"], ["Cadena de subministrament", "Com reduir el cost logístic amb el grupatge", "Quan val la pena enviar volums petits en LCL i LTL.", "8 de gener de 2026"], ["Duanes", "El DUA pas a pas per a nous importadors", "Què és el Document Únic Administratiu i com evitar retencions.", "19 de desembre de 2025"]] },
+        tracking: { crumb: "Inici / Seguiment", title: "Localitza el teu enviament", subtitle: "Introdueix el teu codi de seguiment i consulta l'estat de la teva mercaderia en temps real.", placeholder: "Ex: TRK-001", btn: "Cercar", searching: "Cercant…", notfound: "Codi no trobat. Revisa'l i torna-ho a provar.", error: "Error connectant amb el servidor. Torna-ho a provar.", resultTitle: "Estat de l'enviament", labels: { client: "Client", origin: "Origen", destination: "Destí", eta: "Data prevista (ETA)", location: "Ubicació actual", status: "Estat" }, stages: ["En magatzem", "En trànsit", "Lliurat"] },
+        footer: { tagline: "Solucions logístiques globals: transport marítim, terrestre i emmagatzematge amb gestió duanera.", navTitle: "Navegació", servTitle: "Serveis", contTitle: "Contacte", services: ["Transport marítim", "Transport terrestre", "Emmagatzematge i duanes"], student: "Web de prova (projecte estudiantil)" },
+      },
+      es: {
+        nav: { inici: "Inicio", serveis: "Servicios", empresa: "Quiénes somos", blog: "Blog", tracking: "Seguimiento", contacte: "Contacto", quote: "Pedir cotización" },
+        hero: { eyebrow: "Transporte y cadena de suministro", title: "Soluciones logísticas globales", lead: "Movemos tu mercancía por mar, tierra y almacén con control aduanero integral. Fiabilidad, tecnología y cobertura internacional en un solo operador.", quote: "Pedir cotización", services: "Ver servicios" },
+        intro: { title: "Un operador logístico técnico y de confianza", text: "En NexLog combinamos experiencia en comercio internacional con tecnología de gestión para mover tu mercancía con precisión y trazabilidad.", points: [["Cobertura global", "Más de 120 puertos conectados en todo el mundo."], ["Tecnología WMS", "Trazabilidad por SKU y seguimiento GPS en tiempo real."], ["Gestión aduanera", "Tramitación del DUA y asesoramiento en Incoterms®."]] },
+        stats: ["Puertos conectados", "Almacén propio", "Exactitud de inventario", "Seguimiento GPS"],
+        home: { title: "Nuestros servicios logísticos", subtitle: "Tres líneas técnicas y complementarias para cubrir todo el ciclo de tu mercancía.", cards: [["Transporte marítimo", "Contenedor completo (FCL) y grupaje (LCL) con Incoterms® 2020."], ["Transporte terrestre", "Carga completa (FTL) y grupaje (LTL) con cuaderno CMR."], ["Almacenamiento y aduanas", "Almacén con WMS y tramitación del DUA y depósito aduanero."]], link: "Ver ficha técnica →" },
+        cta: { title: "¿Necesitas mover tu mercancía?", text: "Cuéntanos el origen, el destino y el tipo de carga y te enviaremos una cotización técnica adaptada.", btn: "Solicitar cotización" },
+        serveis: { crumb: "Inicio / Servicios", title: "Catálogo de servicios logísticos", subtitle: "Tres líneas técnicas con referencia interna, datos de comercio internacional e Incoterms® 2020.", numTecnic: "Nº técnico", refInterna: "Ref. interna", dades: "Datos técnicos", btn: "Pedir presupuesto",
+          items: [
+            { title: "Transporte marítimo internacional (FCL / LCL)", def: "Transporte por vía marítima en régimen de contenedor completo (FCL) o grupaje (LCL), con gestión documental y despacho aduanero de origen a destino.", specs: [["Contenedores", "20′ DV (33,2 m³ · 28.200 kg), 40′ DV (67,7 m³) y 40′ HC (76,4 m³)."], ["Incoterms® 2020", "EXW, FOB, CFR, CIF y DAP."], ["Documentación", "Bill of Lading (B/L), factura comercial y packing list."], ["Tránsito", "Shanghái – Barcelona en 30–38 días."]] },
+            { title: "Transporte terrestre y distribución (FTL / LTL)", def: "Distribución por carretera nacional e internacional, en carga completa (FTL) o grupaje (LTL), con trazabilidad GPS y entrega puerta a puerta.", specs: [["Capacidad tráiler lona", "33 palets EUR-EPAL · 24.000 kg · 90 m³."], ["Régimen documental", "cuaderno CMR (transporte internacional por carretera)."], ["Temperatura (ATP)", "de −25 °C a +25 °C."], ["Plazos", "nacional 24–48 h · UE 48–96 h."]] },
+            { title: "Almacenamiento y gestión aduanera (Warehousing)", def: "Almacenamiento, preparación de pedidos (picking) y tramitación aduanera, operados con sistema de gestión de almacén (WMS) e inventario permanente.", specs: [["Instalación", "12.000 m² con 15 muelles de carga."], ["WMS", "trazabilidad por SKU con RFID y código de barras."], ["Aduana", "tramitación del DUA, depósito aduanero (DDA) y depósito fiscal."], ["Nivel de servicio", "99,8% de exactitud de inventario."]] },
+          ] },
+        empresa: { crumb: "Inicio / Quiénes somos", title: "Quiénes somos", subtitle: "Un operador logístico técnico al servicio del comercio internacional.", aboutTitle: "Movemos mercancías, conectamos mercados", aboutText: "NexLog Logística es un operador de transporte y cadena de suministro especializado en comercio internacional. Gestionamos envíos marítimos, terrestres y de almacenamiento para que tu mercancía llegue a tiempo y con la documentación en regla.", btn: "Contacta con nosotros", valorsTitle: "Cómo trabajamos", valorsSubtitle: "Tres principios que guían cada operación que ponemos en marcha.", valors: [["Fiabilidad", "Compromiso con los plazos y el cuidado de la mercancía en cada etapa."], ["Tecnología", "Sistemas WMS y seguimiento GPS que dan trazabilidad y control."], ["Cobertura", "Una red internacional de agentes que llega a más de 120 puertos."]] },
+        contacte: { crumb: "Inicio / Contacto", title: "Contacta con nosotros", subtitle: "Cuéntanos qué necesitas mover y te prepararemos una cotización técnica sin compromiso.", dadesTitle: "Datos de contacto", labels: ["Dirección", "Teléfono", "Correo electrónico", "Horario"], horari: "De lunes a viernes, de 8.00 a 18.00 h", formTitle: "Pide tu presupuesto", f: { nom: "Nombre y apellidos *", empresa: "Empresa", email: "Correo electrónico *", telefon: "Teléfono", consulta: "Consulta operativa *", btn: "Enviar solicitud", ok: "¡Gracias! Hemos recibido tu solicitud. Te responderemos en menos de 24 h laborables." }, ph: { nom: "Tu nombre", empresa: "Nombre de la empresa", email: "nombre@empresa.com", telefon: "+34 600 000 000", consulta: "Indica origen, destino, tipo de mercancía y volumen." } },
+        blog: { crumb: "Inicio / Blog", title: "Blog logístico", subtitle: "Artículos prácticos sobre comercio internacional, transporte y cadena de suministro.", posts: [["Comercio internacional", "Incoterms® 2020: quién paga y quién asume el riesgo", "Diferencia entre FOB, CIF y DAP y cómo elegir el término adecuado.", "15 de enero de 2026"], ["Cadena de suministro", "Cómo reducir el coste logístico con el grupaje", "Cuándo vale la pena enviar volúmenes pequeños en LCL y LTL.", "8 de enero de 2026"], ["Aduanas", "El DUA paso a paso para nuevos importadores", "Qué es el Documento Único Administrativo y cómo evitar retenciones.", "19 de diciembre de 2025"]] },
+        tracking: { crumb: "Inicio / Seguimiento", title: "Localiza tu envío", subtitle: "Introduce tu código de seguimiento y consulta el estado de tu mercancía en tiempo real.", placeholder: "Ej: TRK-001", btn: "Buscar", searching: "Buscando…", notfound: "Código no encontrado. Revísalo e inténtalo de nuevo.", error: "Error conectando con el servidor. Inténtalo de nuevo.", resultTitle: "Estado del envío", labels: { client: "Cliente", origin: "Origen", destination: "Destino", eta: "Fecha prevista (ETA)", location: "Ubicación actual", status: "Estado" }, stages: ["En almacén", "En tránsito", "Entregado"] },
+        footer: { tagline: "Soluciones logísticas globales: transporte marítimo, terrestre y almacenamiento con gestión aduanera.", navTitle: "Navegación", servTitle: "Servicios", contTitle: "Contacto", services: ["Transporte marítimo", "Transporte terrestre", "Almacenamiento y aduanas"], student: "Web de prueba (proyecto estudiantil)" },
+      },
+      en: {
+        nav: { inici: "Home", serveis: "Services", empresa: "About", blog: "Blog", tracking: "Tracking", contacte: "Contact", quote: "Request a quote" },
+        hero: { eyebrow: "Transport and supply chain", title: "Global logistics solutions", lead: "We move your cargo by sea, road and warehouse with full customs control. Reliability, technology and international coverage in a single operator.", quote: "Request a quote", services: "View services" },
+        intro: { title: "A technical, trusted logistics operator", text: "At NexLog we combine international trade expertise with management technology to move your cargo with precision and traceability.", points: [["Global coverage", "More than 120 ports connected worldwide."], ["WMS technology", "SKU traceability and real-time GPS tracking."], ["Customs management", "DUA processing and Incoterms® advice."]] },
+        stats: ["Connected ports", "Own warehouse", "Inventory accuracy", "GPS tracking"],
+        home: { title: "Our logistics services", subtitle: "Three technical, complementary lines covering your cargo's full cycle.", cards: [["Ocean freight", "Full container load (FCL) and groupage (LCL) with Incoterms® 2020."], ["Road freight", "Full truck load (FTL) and groupage (LTL) with CMR note."], ["Warehousing & customs", "Warehouse with WMS and DUA processing and customs warehouse."]], link: "View technical sheet →" },
+        cta: { title: "Need to move your cargo?", text: "Tell us the origin, destination and cargo type and we'll send you a tailored technical quote.", btn: "Request a quote" },
+        serveis: { crumb: "Home / Services", title: "Logistics services catalogue", subtitle: "Three technical lines with internal reference, international trade data and Incoterms® 2020.", numTecnic: "Tech. no.", refInterna: "Internal ref.", dades: "Technical data", btn: "Request a quote",
+          items: [
+            { title: "International ocean freight (FCL / LCL)", def: "Ocean freight in full container load (FCL) or less than container load (LCL), with document management and customs clearance from origin to destination.", specs: [["Containers", "20′ DV (33.2 m³ · 28,200 kg), 40′ DV (67.7 m³) and 40′ HC (76.4 m³)."], ["Incoterms® 2020", "EXW, FOB, CFR, CIF and DAP."], ["Documentation", "Bill of Lading (B/L), commercial invoice and packing list."], ["Transit", "Shanghai – Barcelona in 30–38 days."]] },
+            { title: "Road transport & distribution (FTL / LTL)", def: "National and international road distribution, in full truck load (FTL) or less than truck load (LTL), with GPS tracking and door-to-door delivery.", specs: [["Curtain-side trailer capacity", "33 EUR-EPAL pallets · 24,000 kg · 90 m³."], ["Documentation", "CMR note (international road transport)."], ["Temperature (ATP)", "from −25 °C to +25 °C."], ["Lead times", "domestic 24–48 h · EU 48–96 h."]] },
+            { title: "Warehousing & customs management", def: "Warehousing, order picking and customs processing, run with a warehouse management system (WMS) and permanent inventory.", specs: [["Facility", "12,000 m² with 15 loading docks."], ["WMS", "SKU traceability with RFID and barcode."], ["Customs", "DUA (single administrative document) processing, customs warehouse (DDA) and tax warehouse."], ["Service level", "99.8% inventory accuracy."]] },
+          ] },
+        empresa: { crumb: "Home / About", title: "About us", subtitle: "A technical logistics operator serving international trade.", aboutTitle: "We move goods, we connect markets", aboutText: "NexLog Logística is a transport and supply-chain operator specialising in international trade. We handle ocean, road and warehousing shipments so your cargo arrives on time and with the paperwork in order.", btn: "Contact us", valorsTitle: "How we work", valorsSubtitle: "Three principles that guide every operation we run.", valors: [["Reliability", "Commitment to deadlines and care for the cargo at every stage."], ["Technology", "WMS systems and GPS tracking that provide traceability and control."], ["Coverage", "An international agent network reaching more than 120 ports."]] },
+        contacte: { crumb: "Home / Contact", title: "Contact us", subtitle: "Tell us what you need to move and we'll prepare a technical quote at no obligation.", dadesTitle: "Contact details", labels: ["Address", "Phone", "Email", "Hours"], horari: "Monday to Friday, 8:00 to 18:00", formTitle: "Request your quote", f: { nom: "Full name *", empresa: "Company", email: "Email *", telefon: "Phone", consulta: "Operational enquiry *", btn: "Send request", ok: "Thank you! We've received your request. We'll reply within 24 business hours." }, ph: { nom: "Your name", empresa: "Company name", email: "name@company.com", telefon: "+34 600 000 000", consulta: "Tell us origin, destination, cargo type and volume." } },
+        blog: { crumb: "Home / Blog", title: "Logistics blog", subtitle: "Practical articles on international trade, transport and the supply chain.", posts: [["International trade", "Incoterms® 2020: who pays and who bears the risk", "The difference between FOB, CIF and DAP and how to choose the right term.", "January 15, 2026"], ["Supply chain", "How to cut logistics costs with groupage", "When it pays to ship small volumes as LCL and LTL.", "January 8, 2026"], ["Customs", "The DUA step by step for new importers", "What the Single Administrative Document is and how to avoid holds.", "December 19, 2025"]] },
+        tracking: { crumb: "Home / Tracking", title: "Track your shipment", subtitle: "Enter your tracking code and check the status of your cargo in real time.", placeholder: "e.g. TRK-001", btn: "Search", searching: "Searching…", notfound: "Code not found. Check it and try again.", error: "Error connecting to the server. Please try again.", resultTitle: "Shipment status", labels: { client: "Client", origin: "Origin", destination: "Destination", eta: "Estimated arrival (ETA)", location: "Current location", status: "Status" }, stages: ["In warehouse", "In transit", "Delivered"] },
+        footer: { tagline: "Global logistics solutions: ocean, road and warehousing with customs management.", navTitle: "Navigation", servTitle: "Services", contTitle: "Contact", services: ["Ocean freight", "Road freight", "Warehousing & customs"], student: "Test website (student project)" },
+      },
+      fr: {
+        nav: { inici: "Accueil", serveis: "Services", empresa: "À propos", blog: "Blog", tracking: "Suivi", contacte: "Contact", quote: "Demander un devis" },
+        hero: { eyebrow: "Transport et chaîne d'approvisionnement", title: "Solutions logistiques globales", lead: "Nous déplaçons votre marchandise par mer, route et entrepôt avec un contrôle douanier intégral. Fiabilité, technologie et couverture internationale avec un seul opérateur.", quote: "Demander un devis", services: "Voir les services" },
+        intro: { title: "Un opérateur logistique technique et de confiance", text: "Chez NexLog, nous combinons l'expérience du commerce international et la technologie de gestion pour déplacer votre marchandise avec précision et traçabilité.", points: [["Couverture mondiale", "Plus de 120 ports connectés dans le monde."], ["Technologie WMS", "Traçabilité par SKU et suivi GPS en temps réel."], ["Gestion douanière", "Formalités DUA et conseil sur les Incoterms®."]] },
+        stats: ["Ports connectés", "Entrepôt propre", "Exactitude d'inventaire", "Suivi GPS"],
+        home: { title: "Nos services logistiques", subtitle: "Trois lignes techniques et complémentaires pour tout le cycle de votre marchandise.", cards: [["Transport maritime", "Conteneur complet (FCL) et groupage (LCL) avec Incoterms® 2020."], ["Transport routier", "Charge complète (FTL) et groupage (LTL) avec lettre CMR."], ["Entreposage et douane", "Entrepôt avec WMS, formalités DUA et dépôt douanier."]], link: "Voir la fiche technique →" },
+        cta: { title: "Besoin de déplacer votre marchandise ?", text: "Indiquez-nous l'origine, la destination et le type de charge et nous vous enverrons un devis technique adapté.", btn: "Demander un devis" },
+        serveis: { crumb: "Accueil / Services", title: "Catalogue de services logistiques", subtitle: "Trois lignes techniques avec référence interne, données de commerce international et Incoterms® 2020.", numTecnic: "N° technique", refInterna: "Réf. interne", dades: "Données techniques", btn: "Demander un devis",
+          items: [
+            { title: "Transport maritime international (FCL / LCL)", def: "Transport maritime en conteneur complet (FCL) ou groupage (LCL), avec gestion documentaire et dédouanement de l'origine à la destination.", specs: [["Conteneurs", "20′ DV (33,2 m³ · 28 200 kg), 40′ DV (67,7 m³) et 40′ HC (76,4 m³)."], ["Incoterms® 2020", "EXW, FOB, CFR, CIF et DAP."], ["Documentation", "Bill of Lading (B/L), facture commerciale et packing list."], ["Transit", "Shanghai – Barcelone en 30–38 jours."]] },
+            { title: "Transport routier et distribution (FTL / LTL)", def: "Distribution routière nationale et internationale, en charge complète (FTL) ou groupage (LTL), avec suivi GPS et livraison porte à porte.", specs: [["Capacité semi-remorque bâchée", "33 palettes EUR-EPAL · 24 000 kg · 90 m³."], ["Régime documentaire", "lettre de voiture CMR (transport routier international)."], ["Température (ATP)", "de −25 °C à +25 °C."], ["Délais", "national 24–48 h · UE 48–96 h."]] },
+            { title: "Entreposage et gestion douanière (Warehousing)", def: "Entreposage, préparation de commandes (picking) et formalités douanières, gérés avec un système de gestion d'entrepôt (WMS) et inventaire permanent.", specs: [["Installation", "12 000 m² avec 15 quais de chargement."], ["WMS", "traçabilité par SKU avec RFID et code-barres."], ["Douane", "formalités DUA, dépôt douanier (DDA) et dépôt fiscal."], ["Niveau de service", "99,8 % d'exactitude d'inventaire."]] },
+          ] },
+        empresa: { crumb: "Accueil / À propos", title: "Qui sommes-nous", subtitle: "Un opérateur logistique technique au service du commerce international.", aboutTitle: "Nous déplaçons des marchandises, nous connectons les marchés", aboutText: "NexLog Logística est un opérateur de transport et de chaîne d'approvisionnement spécialisé dans le commerce international. Nous gérons les expéditions maritimes, routières et d'entreposage pour que votre marchandise arrive à temps et avec les documents en règle.", btn: "Contactez-nous", valorsTitle: "Comment nous travaillons", valorsSubtitle: "Trois principes qui guident chaque opération que nous menons.", valors: [["Fiabilité", "Engagement sur les délais et soin de la marchandise à chaque étape."], ["Technologie", "Systèmes WMS et suivi GPS pour la traçabilité et le contrôle."], ["Couverture", "Un réseau international d'agents desservant plus de 120 ports."]] },
+        contacte: { crumb: "Accueil / Contact", title: "Contactez-nous", subtitle: "Dites-nous ce que vous devez déplacer et nous préparerons un devis technique sans engagement.", dadesTitle: "Coordonnées", labels: ["Adresse", "Téléphone", "E-mail", "Horaires"], horari: "Du lundi au vendredi, de 8h00 à 18h00", formTitle: "Demandez votre devis", f: { nom: "Nom et prénom *", empresa: "Entreprise", email: "E-mail *", telefon: "Téléphone", consulta: "Demande opérationnelle *", btn: "Envoyer la demande", ok: "Merci ! Nous avons bien reçu votre demande. Nous vous répondrons sous 24 h ouvrées." }, ph: { nom: "Votre nom", empresa: "Nom de l'entreprise", email: "nom@entreprise.com", telefon: "+34 600 000 000", consulta: "Indiquez origine, destination, type de marchandise et volume." } },
+        blog: { crumb: "Accueil / Blog", title: "Blog logistique", subtitle: "Articles pratiques sur le commerce international, le transport et la chaîne d'approvisionnement.", posts: [["Commerce international", "Incoterms® 2020 : qui paie et qui assume le risque", "La différence entre FOB, CIF et DAP et comment choisir le bon terme.", "15 janvier 2026"], ["Chaîne d'approvisionnement", "Comment réduire le coût logistique avec le groupage", "Quand il vaut la peine d'expédier de petits volumes en LCL et LTL.", "8 janvier 2026"], ["Douanes", "Le DUA pas à pas pour les nouveaux importateurs", "Qu'est-ce que le Document Administratif Unique et comment éviter les retenues.", "19 décembre 2025"]] },
+        tracking: { crumb: "Accueil / Suivi", title: "Localisez votre envoi", subtitle: "Saisissez votre code de suivi et consultez l'état de votre marchandise en temps réel.", placeholder: "Ex : TRK-001", btn: "Rechercher", searching: "Recherche…", notfound: "Code introuvable. Vérifiez-le et réessayez.", error: "Erreur de connexion au serveur. Réessayez.", resultTitle: "État de l'envoi", labels: { client: "Client", origin: "Origine", destination: "Destination", eta: "Date prévue (ETA)", location: "Position actuelle", status: "État" }, stages: ["En entrepôt", "En transit", "Livré"] },
+        footer: { tagline: "Solutions logistiques globales : transport maritime, routier et entreposage avec gestion douanière.", navTitle: "Navigation", servTitle: "Services", contTitle: "Contact", services: ["Transport maritime", "Transport routier", "Entreposage et douane"], student: "Site de test (projet étudiant)" },
+      },
+    };
+
+    function Logo({ className = "h-9 w-9" }) {
+      return (<svg className={className} viewBox="0 0 44 44" aria-hidden="true"><rect width="44" height="44" rx="12" fill="#0f172a" /><path d="M10 29 L22 23 L34 29" stroke="#60a5fa" strokeWidth="2.8" fill="none" strokeLinecap="round" strokeLinejoin="round" /><path d="M10 22.5 L22 16.5 L34 22.5" stroke="#2563eb" strokeWidth="2.8" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>);
+    }
+    function Media({ src, alt, className = "" }) {
+      return (<div className={"relative overflow-hidden bg-gradient-to-br from-slate-800 to-blue-700 " + className}><img src={src} alt={alt} loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} className="absolute inset-0 w-full h-full object-cover" /></div>);
+    }
+
+    function Navbar({ page, go, lang, setLang, t }) {
+      const [open, setOpen] = useState(false);
+      const ids = ["inici", "serveis", "tracking", "empresa", "blog", "contacte"];
+      const cls = (id) => "px-3 py-2 rounded-md text-sm font-medium transition " + (page === id ? "text-blue-600" : "text-slate-700 hover:text-blue-600");
+      const Switch = ({ className = "" }) => (
+        <div className={"flex items-center gap-1 " + className}>
+          {["ca","es","en","fr"].map((l) => (
+            <button key={l} onClick={() => setLang(l)} className={"px-1.5 py-1 text-xs font-semibold rounded transition " + (lang === l ? "bg-blue-600 text-white" : "text-slate-500 hover:text-blue-600")}>{l.toUpperCase()}</button>
+          ))}
+        </div>
+      );
+      return (
+        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200">
+          <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
+            <button onClick={() => { go("inici"); setOpen(false); }} className="flex items-center gap-2"><Logo /><span className="font-extrabold text-lg text-slate-900">NexLog <span className="text-blue-600">Logística</span></span></button>
+            <nav className="hidden md:flex items-center gap-1">
+              {ids.map((id) => (<button key={id} onClick={() => go(id)} className={cls(id)}>{t.nav[id]}</button>))}
+              <Switch className="ml-2 border-l border-slate-200 pl-2" />
+              <button onClick={() => go("contacte")} className="ml-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">{t.nav.quote}</button>
+            </nav>
+            <button onClick={() => setOpen(!open)} className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-lg border border-slate-200 text-slate-700" aria-label="Menú">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">{open ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" /> : <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h16M4 17h16" />}</svg>
+            </button>
+          </div>
+          {open && (
+            <nav className="md:hidden border-t border-slate-200 bg-white px-5 py-3 flex flex-col gap-1">
+              {ids.map((id) => (<button key={id} onClick={() => { go(id); setOpen(false); }} className={cls(id) + " text-left"}>{t.nav[id]}</button>))}
+              <Switch className="mt-2 mb-1" />
+              <button onClick={() => { go("contacte"); setOpen(false); }} className="mt-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">{t.nav.quote}</button>
+            </nav>
+          )}
+        </header>
+      );
+    }
+
+    function Footer({ t }) {
+      const year = new Date().getFullYear();
+      return (
+        <footer className="bg-slate-900 text-slate-300">
+          <div className="max-w-6xl mx-auto px-5 py-14 grid gap-10 md:grid-cols-4">
+            <div>
+              <div className="flex items-center gap-2 mb-4"><Logo /><span className="font-extrabold text-lg text-white">NexLog <span className="text-blue-400">Logística</span></span></div>
+              <p className="text-sm text-slate-400 max-w-xs">{t.footer.tagline}</p>
+            </div>
+            <div><h4 className="text-white font-semibold mb-4">{t.footer.navTitle}</h4><ul className="space-y-2 text-sm text-slate-400"><li>{t.nav.inici}</li><li>{t.nav.serveis}</li><li>{t.nav.empresa}</li><li>{t.nav.blog}</li><li>{t.nav.contacte}</li></ul></div>
+            <div><h4 className="text-white font-semibold mb-4">{t.footer.servTitle}</h4><ul className="space-y-2 text-sm text-slate-400">{t.footer.services.map((s) => (<li key={s}>{s}</li>))}</ul></div>
+            <div><h4 className="text-white font-semibold mb-4">{t.footer.contTitle}</h4><ul className="space-y-2 text-sm text-slate-400"><li>{contact.address1}<br />{contact.address2}</li><li>{contact.phone}</li><li>{contact.email}</li></ul></div>
+          </div>
+          <div className="border-t border-white/10">
+            <div className="max-w-6xl mx-auto px-5 py-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+              <p className="text-xs text-slate-500">© {year} NexLog Logística · {t.footer.student} · Actualitzat 19/11/2026 · Versió 2.2</p>
+              <nav className="flex gap-5 text-xs text-slate-400"><a href="#" className="hover:text-white">Avís Legal</a><a href="#" className="hover:text-white">Privacitat</a><a href="#" className="hover:text-white">Cookies</a></nav>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    function Home({ go, t }) {
+      return (
+        <div>
+          <section className="relative bg-slate-900 text-white">
+            <img src={IMG.hero} alt={t.hero.title} onError={(e)=>{e.currentTarget.style.display="none";}} className="absolute inset-0 w-full h-full object-cover opacity-30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/85 to-slate-900/40"></div>
+            <div className="relative max-w-6xl mx-auto px-5 py-24 md:py-32">
+              <p className="uppercase tracking-widest text-blue-300 text-sm font-semibold mb-3">{t.hero.eyebrow}</p>
+              <h1 className="text-4xl md:text-5xl font-extrabold leading-tight max-w-2xl mb-5">{t.hero.title}</h1>
+              <p className="text-lg text-slate-200 max-w-xl mb-8">{t.hero.lead}</p>
+              <div className="flex flex-wrap gap-3">
+                <button onClick={() => go("contacte")} className="rounded-lg bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-700">{t.hero.quote}</button>
+                <button onClick={() => go("serveis")} className="rounded-lg border border-white/40 px-6 py-3 font-semibold hover:bg-white hover:text-slate-900 transition">{t.hero.services}</button>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-blue-700 text-white">
+            <div className="max-w-6xl mx-auto px-5 py-10 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {t.stats.map((label, i) => (<div key={label}><p className="text-3xl font-extrabold">{nums[i]}</p><p className="text-sm text-blue-100 mt-1">{label}</p></div>))}
+            </div>
+          </section>
+
+          <section className="max-w-6xl mx-auto px-5 py-16 md:py-20">
+            <div className="text-center max-w-2xl mx-auto mb-12"><h2 className="text-3xl font-extrabold text-slate-900 mb-3">{t.home.title}</h2><p className="text-slate-500">{t.home.subtitle}</p></div>
+            <div className="grid gap-8 md:grid-cols-3">
+              {t.home.cards.map((c, i) => (
+                <div key={c[0]} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition">
+                  <Media src={IMG.srv[i]} alt={c[0]} className="h-44" />
+                  <div className="p-6"><h3 className="text-lg font-bold text-slate-900 mb-2">{c[0]}</h3><p className="text-slate-500 text-sm mb-4">{c[1]}</p><button onClick={() => go("serveis")} className="text-blue-600 font-semibold text-sm hover:underline">{t.home.link}</button></div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="bg-white border-t border-slate-200">
+            <div className="max-w-6xl mx-auto px-5 py-16">
+              <div className="max-w-2xl mb-10"><h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-3">{t.intro.title}</h2><p className="text-slate-500">{t.intro.text}</p></div>
+              <div className="grid gap-6 md:grid-cols-3">
+                {t.intro.points.map((p) => (<div key={p[0]} className="rounded-2xl border border-slate-200 p-6 bg-slate-50"><h3 className="text-lg font-bold text-slate-900 mb-2">{p[0]}</h3><p className="text-slate-500 text-sm">{p[1]}</p></div>))}
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-slate-900 text-white">
+            <div className="max-w-6xl mx-auto px-5 py-16 text-center"><h2 className="text-2xl md:text-3xl font-extrabold mb-3">{t.cta.title}</h2><p className="text-slate-300 max-w-xl mx-auto mb-7">{t.cta.text}</p><button onClick={() => go("contacte")} className="inline-block rounded-lg bg-blue-600 px-7 py-3 font-semibold hover:bg-blue-700">{t.cta.btn}</button></div>
+          </section>
+        </div>
+      );
+    }
+
+    function Serveis({ go, t }) {
+      return (
+        <div>
+          <section className="bg-slate-900 text-white"><div className="max-w-6xl mx-auto px-5 py-16"><p className="text-sm text-slate-400 mb-3">{t.serveis.crumb}</p><h1 className="text-3xl md:text-4xl font-extrabold mb-3">{t.serveis.title}</h1><p className="text-slate-300 max-w-2xl">{t.serveis.subtitle}</p></div></section>
+          <section className="max-w-6xl mx-auto px-5 py-16">
+            {t.serveis.items.map((s, i) => (
+              <article key={codes[i].code} className={"bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mb-10 md:flex " + (i % 2 === 1 ? "md:flex-row-reverse" : "")}>
+                <Media src={IMG.srv[i]} alt={s.title} className="md:w-2/5 h-56 md:h-auto" />
+                <div className="p-8 md:w-3/5">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <span className="font-mono text-xs bg-slate-100 border border-slate-200 rounded px-2.5 py-1">{t.serveis.numTecnic}: <b className="text-blue-600">{codes[i].code}</b></span>
+                    <span className="font-mono text-xs bg-slate-100 border border-slate-200 rounded px-2.5 py-1">{t.serveis.refInterna}: <b className="text-blue-600">{codes[i].ref}</b></span>
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-900 mb-3">{s.title}</h2>
+                  <p className="text-slate-600 mb-5">{s.def}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-600 mb-3">{t.serveis.dades}</p>
+                  <ul className="space-y-2 mb-6">{s.specs.map((sp, idx) => (<li key={idx} className="flex gap-2 text-sm text-slate-600"><span className="text-blue-600 font-bold">✓</span><span><b className="text-slate-900">{sp[0]}:</b> {sp[1]}</span></li>))}</ul>
+                  <button onClick={() => go("contacte")} className="inline-block rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">{t.serveis.btn}</button>
+                </div>
+              </article>
+            ))}
+          </section>
+        </div>
+      );
+    }
+
+    function Empresa({ go, t }) {
+      return (
+        <div>
+          <section className="bg-slate-900 text-white"><div className="max-w-6xl mx-auto px-5 py-16"><p className="text-sm text-slate-400 mb-3">{t.empresa.crumb}</p><h1 className="text-3xl md:text-4xl font-extrabold mb-3">{t.empresa.title}</h1><p className="text-slate-300 max-w-2xl">{t.empresa.subtitle}</p></div></section>
+          <section className="max-w-6xl mx-auto px-5 py-16 grid gap-12 md:grid-cols-2 md:items-center">
+            <Media src={IMG.about} alt={t.empresa.aboutTitle} className="rounded-2xl h-72 md:h-80 shadow-sm" />
+            <div><h2 className="text-2xl font-extrabold text-slate-900 mb-4">{t.empresa.aboutTitle}</h2><p className="text-slate-600 mb-6">{t.empresa.aboutText}</p><button onClick={() => go("contacte")} className="inline-block rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-800 hover:border-blue-600 hover:text-blue-600 transition">{t.empresa.btn}</button></div>
+          </section>
+          <section className="bg-white border-t border-slate-200"><div className="max-w-6xl mx-auto px-5 py-16"><div className="text-center max-w-2xl mx-auto mb-12"><h2 className="text-3xl font-extrabold text-slate-900 mb-3">{t.empresa.valorsTitle}</h2><p className="text-slate-500">{t.empresa.valorsSubtitle}</p></div><div className="grid gap-8 md:grid-cols-3">{t.empresa.valors.map((v) => (<div key={v[0]} className="rounded-2xl border border-slate-200 p-7 bg-slate-50"><h3 className="text-lg font-bold text-slate-900 mb-2">{v[0]}</h3><p className="text-slate-500 text-sm">{v[1]}</p></div>))}</div></div></section>
+        </div>
+      );
+    }
+
+    function Contacte({ t }) {
+      const [sent, setSent] = useState(false);
+      const [sending, setSending] = useState(false);
+      const [error, setError] = useState(false);
+      const c = t.contacte;
+      const values = [contact.address1 + " — " + contact.address2, contact.phone, contact.email, c.horari];
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        setSending(true); setError(false);
+        try {
+          const res = await fetch("https://formspree.io/f/mnpdprzl", { method: "POST", body: new FormData(form), headers: { Accept: "application/json" } });
+          if (res.ok) { setSent(true); form.reset(); } else { setError(true); }
+        } catch (err) { setError(true); }
+        setSending(false);
+      };
+      return (
+        <div>
+          <section className="bg-slate-900 text-white"><div className="max-w-6xl mx-auto px-5 py-16"><p className="text-sm text-slate-400 mb-3">{c.crumb}</p><h1 className="text-3xl md:text-4xl font-extrabold mb-3">{c.title}</h1><p className="text-slate-300 max-w-2xl">{c.subtitle}</p></div></section>
+          <section className="max-w-6xl mx-auto px-5 py-16 grid gap-10 md:grid-cols-2">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 mb-6">{c.dadesTitle}</h2>
+              <ul className="space-y-4">{c.labels.map((label, i) => (<li key={label} className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm"><p className="font-semibold text-slate-900">{label}</p><p className="text-slate-500 text-sm mt-1">{values[i]}</p></li>))}</ul>
+            </div>
+            <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+              <h2 className="text-xl font-bold text-slate-900 mb-5">{c.formTitle}</h2>
+              <form onSubmit={handleSubmit}>
+                <input type="hidden" name="_subject" value="Nova sol·licitud — web NexLog" />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div><label className="block text-sm font-medium text-slate-700 mb-1">{c.f.nom}</label><input required name="nom" type="text" className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={c.ph.nom} /></div>
+                  <div><label className="block text-sm font-medium text-slate-700 mb-1">{c.f.empresa}</label><input name="empresa" type="text" className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={c.ph.empresa} /></div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                  <div><label className="block text-sm font-medium text-slate-700 mb-1">{c.f.email}</label><input required name="email" type="email" className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={c.ph.email} /></div>
+                  <div><label className="block text-sm font-medium text-slate-700 mb-1">{c.f.telefon}</label><input name="telefon" type="tel" className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={c.ph.telefon} /></div>
+                </div>
+                <div className="mt-4"><label className="block text-sm font-medium text-slate-700 mb-1">{c.f.consulta}</label><textarea required name="consulta" rows="5" className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={c.ph.consulta}></textarea></div>
+                <button type="submit" disabled={sending} className="mt-5 w-full rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60">{sending ? "..." : c.f.btn}</button>
+                {sent && <p className="mt-4 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3">{c.f.ok}</p>}
+                {error && <p className="mt-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">Error · {contact.email}</p>}
+              </form>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    function Blog({ t }) {
+      return (
+        <div>
+          <section className="bg-slate-900 text-white"><div className="max-w-6xl mx-auto px-5 py-16"><p className="text-sm text-slate-400 mb-3">{t.blog.crumb}</p><h1 className="text-3xl md:text-4xl font-extrabold mb-3">{t.blog.title}</h1><p className="text-slate-300 max-w-2xl">{t.blog.subtitle}</p></div></section>
+          <section className="max-w-6xl mx-auto px-5 py-16"><div className="grid gap-8 md:grid-cols-3">
+            {t.blog.posts.map((p, i) => (
+              <article key={p[1]} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition">
+                <Media src={IMG.blog[i]} alt={p[1]} className="h-44" />
+                <div className="p-6"><span className="inline-block text-xs font-semibold uppercase tracking-wide text-white bg-blue-600 rounded-full px-3 py-1 mb-3">{p[0]}</span><h2 className="text-lg font-bold text-slate-900 mb-2">{p[1]}</h2><p className="text-slate-500 text-sm mb-3">{p[2]}</p><p className="text-xs text-slate-400">{p[3]}</p></div>
+              </article>
+            ))}
+          </div></section>
+        </div>
+      );
+    }
+
+    function Tracking({ t }) {
+      const tr = t.tracking;
+      const [code, setCode] = useState("");
+      const [state, setState] = useState("idle");
+      const [data, setData] = useState(null);
+      const stageOf = (s) => {
+        const x = (s || "").toLowerCase();
+        if (x.includes("lliur") || x.includes("entreg") || x.includes("deliver") || x.includes("livr")) return 2;
+        if (x.includes("magatzem") || x.includes("almac") || x.includes("warehouse") || x.includes("entrep") || x.includes("recoll")) return 0;
+        return 1;
+      };
+      const search = async (e) => {
+        e.preventDefault();
+        const q = code.trim();
+        if (!q) return;
+        setState("loading"); setData(null);
+        try {
+          const res = await fetch(SHEETDB_API + "/search?tracking_code=" + encodeURIComponent(q));
+          if (!res.ok) throw new Error("http");
+          const rows = await res.json();
+          if (Array.isArray(rows) && rows.length > 0) { setData(rows[0]); setState("found"); }
+          else { setState("notfound"); }
+        } catch (err) { setState("error"); }
+      };
+      const stage = data ? stageOf(data.status) : 0;
+      const pct = ["15%", "60%", "100%"][stage];
+      const barColor = ["bg-amber-500", "bg-blue-600", "bg-green-500"][stage];
+      return (
+        <div>
+          <section className="bg-slate-900 text-white"><div className="max-w-6xl mx-auto px-5 py-16"><p className="text-sm text-slate-400 mb-3">{tr.crumb}</p><h1 className="text-3xl md:text-4xl font-extrabold mb-3">{tr.title}</h1><p className="text-slate-300 max-w-2xl">{tr.subtitle}</p></div></section>
+          <section className="max-w-3xl mx-auto px-5 py-16">
+            <form onSubmit={search} className="flex flex-col sm:flex-row gap-3 mb-8">
+              <input value={code} onChange={(e) => setCode(e.target.value)} type="text" className="flex-1 rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={tr.placeholder} />
+              <button type="submit" disabled={state === "loading"} className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-60">{state === "loading" ? tr.searching : tr.btn}</button>
+            </form>
+            {state === "notfound" && <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 px-4 py-3 font-medium">{tr.notfound}</div>}
+            {state === "error" && <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 px-4 py-3 font-medium">{tr.error}</div>}
+            {state === "found" && data && (
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="bg-slate-900 text-white px-6 py-5 flex items-center justify-between gap-4">
+                  <div><p className="text-xs uppercase tracking-widest text-slate-400">{tr.resultTitle}</p><p className="text-xl font-extrabold">{data.tracking_code || code}</p></div>
+                  <span className={"text-sm font-semibold rounded-full px-3 py-1 text-white " + barColor}>{data.status}</span>
+                </div>
+                <div className="p-6">
+                  <div className="mb-8">
+                    <div className="relative h-2 bg-slate-200 rounded-full"><div className={"absolute left-0 top-0 h-2 rounded-full transition-all duration-500 " + barColor} style={{ width: pct }}></div></div>
+                    <div className="flex justify-between mt-3">
+                      {tr.stages.map((label, i) => (
+                        <div key={label} className="flex flex-col items-center text-center" style={{ width: "33%" }}>
+                          <span className={"h-4 w-4 rounded-full border-2 " + (i <= stage ? barColor + " border-transparent" : "bg-white border-slate-300")}></span>
+                          <span className={"text-xs mt-1 " + (i <= stage ? "text-slate-900 font-semibold" : "text-slate-400")}>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {[[tr.labels.client, data.client], [tr.labels.origin, data.origin], [tr.labels.destination, data.destination], [tr.labels.location, data.location], [tr.labels.eta, data.eta], [tr.labels.status, data.status]].map((row) => (
+                      <div key={row[0]} className="rounded-xl border border-slate-200 p-4 bg-slate-50"><p className="text-xs uppercase tracking-wide text-slate-400">{row[0]}</p><p className="font-semibold text-slate-900 mt-1">{row[1] || "—"}</p></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
+      );
+    }
+
+    function App() {
+      const [page, setPage] = useState("inici");
+      const [lang, setLang] = useState("ca");
+      const t = translations[lang];
+      const go = (p) => { setPage(p); window.scrollTo(0, 0); };
+      return (
+        <div className="min-h-screen flex flex-col bg-slate-50 text-slate-700">
+          <Navbar page={page} go={go} lang={lang} setLang={setLang} t={t} />
+          <main className="flex-1">
+            {page === "inici" && <Home go={go} t={t} />}
+            {page === "serveis" && <Serveis go={go} t={t} />}
+            {page === "empresa" && <Empresa go={go} t={t} />}
+            {page === "tracking" && <Tracking t={t} />}
+            {page === "contacte" && <Contacte t={t} />}
+            {page === "blog" && <Blog t={t} />}
+          </main>
+          <Footer t={t} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
